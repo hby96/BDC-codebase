@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="96e7f74e-5be8-4e0f-9d49-7e333db9587e" name="SFTP" url="http://ecg@10.181.44.200">
+        <fileTransfer host="ecg@10.181.44.200" port="22" rootFolder="/home/ecg/Documents/Projects/HuaWei_Big_Data/Demo" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

@@ -1,0 +1,28 @@
+
+#CSV_SAVE_PATH: '/home/ecg/Documents/Projects/HuaWei_Big_Data/Demo/main/result.csv'
+CSV_SAVE_PATH: 'result.csv'
+
+DATASET:
+  TRAIN_GPS_PATH: '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/train0523/train0523.csv'
+  TEST_DATA_PATH: '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/A_testData0531.csv'
+  #order_data_path = 'data/loadingOrderEvent.csv'
+  #port_data_path = 'data/port.csv'
+  LOADER:
+    TYPE: 'Base'
+#    NROWS: 1000000
+    NROWS: -1
+
+PRE_PROCESS:
+  TYPE: 'Base'
+
+MODEL:
+  TYPE: 'Base'
+
+TRAIN:
+  TRAINER:
+    TYPE: 'Base'
+  TESTER:
+    TYPE: 'Base'
+
+EVALUATE:
+  TYPE: 'Base'
