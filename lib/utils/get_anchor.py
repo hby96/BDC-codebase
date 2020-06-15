@@ -9,9 +9,9 @@ anchor_root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/filter_an
 total_list = os.listdir(root_path)
 
 
-columns = ['loadingOrder', 'carrierName', 'timestamp', 'longitude',
-                  'latitude', 'vesselMMSI', 'speed', 'direction', 'vesselNextport',
-                  'vesselNextportETA', 'vesselStatus', 'vesselDatasource', 'TRANSPORT_TRACE',]
+# columns = ['loadingOrder', 'carrierName', 'timestamp', 'longitude',
+#                   'latitude', 'vesselMMSI', 'speed', 'direction', 'vesselNextport',
+#                   'vesselNextportETA', 'vesselStatus', 'vesselDatasource', 'TRANSPORT_TRACE',]# 'anchor', 'new_anchor']
 converters = {
         'loadingOrder': str,
         'carrierName': str,
@@ -26,17 +26,15 @@ converters = {
         'vesselStatus': str,
         'vesselDatasource': str,
         'TRANSPORT_TRACE': str,
+        # 'anchor': np.float,
+        # 'new_anchor': np.float,
     }
 
 for idx, csv_path in tqdm(enumerate(total_list)):
-    csv_path = 'AH140801152526.csv'
     if 'train' or 'valid' in root_path:
-        df = pd.read_csv(os.path.join(root_path, csv_path), index_col=False)
-        # df = pd.read_csv(os.path.join(root_path, csv_path), names=columns, header=0, converters=converters, index_col=False)
+        df = pd.read_csv(os.path.join(root_path, csv_path), header=0, converters=converters)
         df['vesselNextportETA'] = pd.to_datetime(df['vesselNextportETA'], infer_datetime_format=True)
-        print(df.head())
-        assert False
-        df.columns = columns
+        # df.columns = columns
     elif 'test' in root_path:
         df = pd.read_csv(os.path.join(root_path, csv_path))
 
@@ -52,7 +50,7 @@ for idx, csv_path in tqdm(enumerate(total_list)):
     df['lon_diff_per'] = 100 * df['lon_diff'] / (df['diff_secs'])
     df['diff_minutes'] = df.groupby('loadingOrder')['timestamp'].diff(1).dt.total_seconds() // 60
     df['anchor'] = df.apply(lambda x: 1 if x['lat_diff'] <= 0.03 and x['lon_diff'] <= 0.03
-                                           and x['speed_diff'] <= 0.3 and x['speed'] <= 3 else 0, axis=1)
+                                           and x['speed_diff'] <= 0.3 and x['speed'] <= 3 and abs(x['lat_diff_per']) <= 0.001 and abs(x['lon_diff_per']) <= 0.001 else 0, axis=1)
     df['new_anchor'] = df['anchor'].copy(True)
     win_size = 20
     for i in range(10, df.shape[0]-10, 1):
