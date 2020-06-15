@@ -26,8 +26,8 @@ converters = {
         'vesselStatus': str,
         'vesselDatasource': str,
         'TRANSPORT_TRACE': str,
-        # 'anchor': np.float,
-        # 'new_anchor': np.float,
+        'anchor': int,
+        'new_anchor': int,
     }
 
 for idx, csv_path in tqdm(enumerate(total_list)):
@@ -49,8 +49,9 @@ for idx, csv_path in tqdm(enumerate(total_list)):
     df['lat_diff_per'] = 100 * df['lat_diff'] / (df['diff_secs'])
     df['lon_diff_per'] = 100 * df['lon_diff'] / (df['diff_secs'])
     df['diff_minutes'] = df.groupby('loadingOrder')['timestamp'].diff(1).dt.total_seconds() // 60
-    df['anchor'] = df.apply(lambda x: 1 if x['lat_diff'] <= 0.03 and x['lon_diff'] <= 0.03
-                                           and x['speed_diff'] <= 0.3 and x['speed'] <= 3 and abs(x['lat_diff_per']) <= 0.001 and abs(x['lon_diff_per']) <= 0.001 else 0, axis=1)
+    # df['anchor'] = df.apply(lambda x: 1 if x['lat_diff'] <= 0.03 and x['lon_diff'] <= 0.03
+    #                                        and x['speed_diff'] <= 0.3 and x['speed'] <= 3 and abs(x['lat_diff_per']) <= 0.001 and abs(x['lon_diff_per']) <= 0.001 else 0, axis=1)
+    df['anchor'] = ((df['lat_diff'] <= 0.03) & (df['lon_diff'] <= 0.03) & (df['speed_diff'] <= 0.3) & (df['speed'] <= 3) & (abs(df['lat_diff_per']) <= 0.001) & (abs(df['lon_diff_per']) <= 0.001)).astype('int')
     df['new_anchor'] = df['anchor'].copy(True)
     win_size = 20
     for i in range(10, df.shape[0]-10, 1):
@@ -64,4 +65,3 @@ for idx, csv_path in tqdm(enumerate(total_list)):
     # df.drop(['lat_diff', 'lon_diff', 'speed_diff', 'diff_minutes'], axis=1, inplace=True)
     save_path = os.path.join(anchor_root_path, csv_path)
     df.to_csv(save_path, index=False)
-    assert False
