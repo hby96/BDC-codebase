@@ -17,6 +17,9 @@ def save_to_csv(result, test_data, cfg):
     # test_data['timestamp'] = test_data['temp_timestamp']
     test_data['timestamp'] = test_data['timestamp'].apply(lambda x: x.strftime('%Y-%m-%dT%H:%M:%S.000Z'))
     # 整理columns顺序
+    # result = test_data[
+    #     ['loadingOrder', 'timestamp', 'longitude', 'latitude', 'carrierName', 'vesselMMSI', 'onboardDate', 'ETA',
+    #      'creatDate']]
     result = test_data[
         ['loadingOrder', 'timestamp', 'longitude', 'latitude', 'carrierName', 'vesselMMSI', 'onboardDate', 'ETA',
          'creatDate']]

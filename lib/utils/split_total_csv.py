@@ -40,7 +40,7 @@ with open(ori_csv_path, 'r') as f:
     reader = csv.reader(f)
     # assert False
     for idx, row in enumerate(reader):
-        print(idx1)
+        print(idx)
         order_name = row[0]
         save_path = os.path.join(save_root_path, order_name + '.csv')
         if os.path.exists(save_path):

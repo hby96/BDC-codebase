@@ -3,16 +3,16 @@ import os
 from tqdm import tqdm
 import numpy as np
 
-root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/split_test_wo_duplicate/'
-save_root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/split_test_our_feature/'
-# root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/split_valid/'
-# save_root_path = '/home/ecg/Documents/Dataset/Huaweis_Big_Data/chusai/split_valid_feature/'
+root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/split_test_file/'
+save_root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/split_test_feature/'
+# root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/train_wo_head_end_file/'
+# save_root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/train_wo_head_end_feature'
 total_list = os.listdir(root_path)
 
 
-columns = ['loadingOrder', 'carrierName', 'timestamp', 'longitude',
-                  'latitude', 'vesselMMSI', 'speed', 'direction', 'vesselNextport',
-                  'vesselNextportETA', 'vesselStatus', 'vesselDatasource', 'TRANSPORT_TRACE']
+# columns = ['loadingOrder', 'carrierName', 'timestamp', 'longitude',
+#                   'latitude', 'vesselMMSI', 'speed', 'direction', 'vesselNextport',
+#                   'vesselNextportETA', 'vesselStatus', 'vesselDatasource', 'TRANSPORT_TRACE']
 converters = {
         'loadingOrder': str,
         'carrierName': str,
@@ -27,12 +27,15 @@ converters = {
         'vesselStatus': str,
         'vesselDatasource': str,
         'TRANSPORT_TRACE': str,
+        'anchor': np.float,
+        'new_anchor': np.float,
         'lat_diff': np.float,
         'lon_diff': np.float,
         'speed_diff': np.float,
+        'diff_secs': np.float,
+        'lat_diff_per': np.float,
+        'lon_diff_per': np.float,
         'diff_minutes': np.float,
-        'anchor': np.float,
-        'new_anchor': np.float,
     }
 
 
@@ -57,12 +60,10 @@ def get_distance(A, B):
 
 
 for idx, csv_path in tqdm(enumerate(total_list)):
-    if ('train' in root_path) or ('valid' in root_path) or ('best' in root_path):
-        df = pd.read_csv(os.path.join(root_path, csv_path), names=columns, header=0, converters=converters)
-        df['vesselNextportETA'] = pd.to_datetime(df['vesselNextportETA'], infer_datetime_format=True)
-        df.columns = columns
+    if ('train' in root_path) or ('valid' in root_path) or ('filter' in root_path):
+        df = pd.read_csv(os.path.join(root_path, csv_path), header=0, converters=converters)
     elif 'test' in root_path:
-        df = pd.read_csv(os.path.join(root_path, csv_path))
+        df = pd.read_csv(os.path.join(root_path, csv_path), header=0)
     euclid_dis = get_distance((df.iloc[0]['latitude'], df.iloc[0]['longitude']), (df.iloc[len(df) - 1]['latitude'], df.iloc[len(df) - 1]['longitude']))
 
     abs_long = max(df.iloc[0]['longitude'], df.iloc[len(df) - 1]['longitude']) - min(df.iloc[0]['longitude'], df.iloc[len(df) - 1]['longitude'])
@@ -82,13 +83,30 @@ for idx, csv_path in tqdm(enumerate(total_list)):
     # df['old_direc_diff'] = df.groupby('loadingOrder')['direction'].diff(1)
     # df['direc_diff'] = df['old_direc_diff'].copy(True)
     # df['direc_diff'][df['old_direc_diff'] < 0] = df['old_direc_diff'] + 36000
-    # df['angular_speed'] = df['direc_diff'] / df['diff_minutes']
+
     # df['anchor'] = ((df['lat_diff'] <= 0.03) & (df['lon_diff'] <= 0.03) & (df['speed_diff'] <= 0.3) &
     #                 (df['diff_minutes'] <= 10)).astype('int')
 
+    df['diff_secs'] = df.groupby('loadingOrder')['timestamp'].diff(1).dt.total_seconds()
     df['old_direc_diff'] = df.groupby('loadingOrder')['direction'].diff(1)
     df['direc_diff'] = df['old_direc_diff'].copy(True)
     df['direc_diff'][df['old_direc_diff'] < 0] = df['old_direc_diff'] + 36000
+
+    df['angular_speed'] = df['direc_diff'] / df['diff_secs']
+    # df['angular_speed'] = df['direc_diff'] / df['diff_secs']
+    # df['anchor'] = (
+    #         (df['lat_diff'] <= 0.03) & (df['lon_diff'] <= 0.03) & (df['speed_diff'] <= 0.3) & (df['speed'] <= 3) & (
+    #         abs(df['lat_diff_per']) <= 0.001) & (abs(df['lon_diff_per']) <= 0.001)).astype('int')
+    # df['new_anchor'] = df['anchor'].copy(True)
+    # win_size = 20
+    # for i in range(10, df.shape[0] - 10, 1):
+    #     min_win = max(i - win_size / 2, 0)
+    #     max_win = min(i + win_size / 2, df.shape[0])
+    #     value = df['anchor'].iloc[int(min_win): int(max_win)].mean()
+    #     if value >= 0.5:
+    #         df['new_anchor'].iloc[i] = 1
+    #     else:
+    #         df['new_anchor'].iloc[i] = 0
 
     if 'train' or 'valid' in root_path:
         group_data = df.groupby('loadingOrder')['timestamp'].agg(mmax='max', count='count',

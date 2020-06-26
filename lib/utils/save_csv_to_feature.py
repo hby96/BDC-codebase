@@ -3,10 +3,10 @@ import os
 from tqdm import tqdm
 import numpy as np
 
-root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/useful_train_by_anchor_start_port_series/'
-save_root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/useful_train_by_anchor_start_port_series_feature/'
-# root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/split_valid/'
-# save_root_path = '/home/ecg/Documents/Dataset/Huaweis_Big_Data/chusai/split_valid_feature/'
+# root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/filter_anchor_recal/'
+# save_root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/filter_anchor_recal_feature/'
+root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/two_trace_port_right_file/'
+save_root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/two_trace_port_right_feature/'
 total_list = os.listdir(root_path)
 
 
@@ -30,10 +30,9 @@ converters = {
     }
 
 for idx, csv_path in tqdm(enumerate(total_list)):
-    if 'train' or 'valid' in root_path:
-        df = pd.read_csv(os.path.join(root_path, csv_path), names=columns, header=0, converters=converters)
+    if ('train' in root_path) or ('valid' in root_path) or ('trace' in root_path):
+        df = pd.read_csv(os.path.join(root_path, csv_path), header=0, converters=converters)
         df['vesselNextportETA'] = pd.to_datetime(df['vesselNextportETA'], infer_datetime_format=True)
-        df.columns = columns
     elif 'test' in root_path:
         df = pd.read_csv(os.path.join(root_path, csv_path))
 

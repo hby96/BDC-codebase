@@ -3,40 +3,34 @@ import os
 from tqdm import tqdm
 import numpy as np
 
-root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/filter_anchor_recal/'
-# anchor_root_path = '/home/ecg/Documents/Projects/HuaWei_Big_Data/Demo/filter_anchor/'
-anchor_root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/filter_anchor'
+root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/get_final_anchor/all_cal_trace_splitMMSI8'
+anchor_root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/get_final_anchor/all_cal_trace_splitMMSI8_w_anchor'
+# root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/split_test/'
+# anchor_root_path = '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/split_test_file'
 total_list = os.listdir(root_path)
 
 
-# columns = ['loadingOrder', 'carrierName', 'timestamp', 'longitude',
-#                   'latitude', 'vesselMMSI', 'speed', 'direction', 'vesselNextport',
-#                   'vesselNextportETA', 'vesselStatus', 'vesselDatasource', 'TRANSPORT_TRACE',]# 'anchor', 'new_anchor']
+columns = ['loadingOrder', 'carrierName', 'timestamp', 'longitude',
+                  'latitude', 'vesselMMSI', 'speed', 'direction', 'vesselNextport',
+                  'vesselNextportETA', 'vesselStatus', 'vesselDatasource', 'TRANSPORT_TRACE', 'NEW_TRACE', 'anchor', 'new_anchor']
+
 converters = {
-        'loadingOrder': str,
-        'carrierName': str,
-        'timestamp': str,
         'longitude': np.float,
         'latitude': np.float,
-        'vesselMMSI': str,
         'speed': np.float,
         'direction': np.float,
-        'vesselNextport': str,
-        'vesselNextportETA': str,
-        'vesselStatus': str,
-        'vesselDatasource': str,
-        'TRANSPORT_TRACE': str,
-        'anchor': int,
-        'new_anchor': int,
     }
 
-for idx, csv_path in tqdm(enumerate(total_list)):
-    if 'train' or 'valid' in root_path:
+
+for csv_path in tqdm(total_list):
+    if ('train' in root_path) or ('valid' in root_path) or ('all_cal' in root_path):
         df = pd.read_csv(os.path.join(root_path, csv_path), header=0, converters=converters)
         df['vesselNextportETA'] = pd.to_datetime(df['vesselNextportETA'], infer_datetime_format=True)
         # df.columns = columns
     elif 'test' in root_path:
         df = pd.read_csv(os.path.join(root_path, csv_path))
+
+    drop_features = [c for c in df.columns if c not in columns]
 
     df['timestamp'] = pd.to_datetime(df['timestamp'], infer_datetime_format=True)
 
@@ -62,6 +56,9 @@ for idx, csv_path in tqdm(enumerate(total_list)):
             df['new_anchor'].iloc[i] = 1
         else:
             df['new_anchor'].iloc[i] = 0
-    # df.drop(['lat_diff', 'lon_diff', 'speed_diff', 'diff_minutes'], axis=1, inplace=True)
+
+    df.drop(['lat_diff', 'lon_diff', 'speed_diff', 'diff_minutes', 'diff_secs', 'lat_diff_per', 'lon_diff_per'], axis=1, inplace=True)
+    df.drop(drop_features, axis=1, inplace=True)
+    df.fillna(0, inplace=True)
     save_path = os.path.join(anchor_root_path, csv_path)
     df.to_csv(save_path, index=False)

@@ -1,0 +1,35 @@
+
+CSV_SAVE_PATH: 'res_result.csv'
+#CSV_SAVE_PATH: 'res_xgboost_result.csv'
+
+DATASET:
+#  TRAIN_GPS_PATH: '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/random_cut_two_trace_cal_head_end_res_feature/'
+  TRAIN_GPS_PATH: '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/0624_data/random_cut_train_specified_trace_feature'
+
+#  TRACE_TIME_PATH: '/home/ecg/Documents/Projects/HuaWei_Big_Data/Demo/test_trace_time.csv'
+  TRACE_TIME_PATH: '/home/ecg/Documents/Projects/HuaWei_Big_Data/Demo/truth_n.csv'
+
+#  TEST_DATA_PATH: '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/split_test_res_feature/'
+  TEST_DATA_PATH: '/home/ecg/Documents/Dataset/Huawei_Big_Data/chusai/0624_data/split_test_uniform_feature/'
+
+  LOADER:
+    TYPE: 'LoadByResFeature'
+#    NROWS: 1000
+    NROWS: -1
+
+PRE_PROCESS:
+  TYPE: 'Identity'
+
+MODEL:
+  TYPE: 'Base'
+
+TRAIN:
+  TRAINER:
+    TYPE: 'Res'
+#    TYPE: 'ResEnsemble'
+#    TYPE: 'ResXgboost'
+  TESTER:
+    TYPE: 'Base'
+
+EVALUATE:
+  TYPE: 'Base'

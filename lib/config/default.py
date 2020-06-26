@@ -14,6 +14,7 @@ def get_defaults_cfg():
 
     cfg["DATASET"] = CfgNode()
     cfg.DATASET.TRAIN_GPS_PATH = ""
+    cfg.DATASET.TRACE_TIME_PATH = ""
     cfg.DATASET.VALID_GPS_PATH = ""
     cfg.DATASET.TEST_DATA_PATH = ""
     cfg.DATASET.LOADER = CfgNode()
