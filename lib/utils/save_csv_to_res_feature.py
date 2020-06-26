@@ -69,10 +69,6 @@ def save_to_feature(port_gps_info, trace_time_info, root_path, save_root_path):
         'latitude': np.float,
     }
 
-    time_50000 = 0
-    time_200000 = 0
-    time_500000 = 0
-
     for idx, csv_path in tqdm(enumerate(total_list)):
         df = pd.read_csv(os.path.join(root_path, csv_path), header=0, converters=converters)
 
@@ -81,25 +77,14 @@ def save_to_feature(port_gps_info, trace_time_info, root_path, save_root_path):
             print(df['TRANSPORT_TRACE'].iloc[0])
             print(trace_time_info)
             assert False
-            continue
 
-        # print(csv_path)
-        # print(test_trace_time_info[df['TRANSPORT_TRACE'].iloc[0]])
 
         df['timestamp'] = pd.to_datetime(df['timestamp'], infer_datetime_format=True)
         start_port = df['TRANSPORT_TRACE'].iloc[0].split('-')[0]
         end_port = df['TRANSPORT_TRACE'].iloc[0].split('-')[1]
         start_gps = port_gps_info[start_port]
         end_gps = port_gps_info[end_port]
-        # dis = get_distance(start_gps, end_gps)
 
-        # df['diff_secs'] = df.groupby('loadingOrder')['timestamp'].diff(1).dt.total_seconds()
-        # df['old_direc_diff'] = df.groupby('loadingOrder')['direction'].diff(1)
-        # df['direc_diff'] = df['old_direc_diff'].copy(True)
-        # df['direc_diff'][df['old_direc_diff'] < 0] = df['old_direc_diff'] + 36000
-        # df['angular_speed'] = df['direc_diff'] / df['diff_secs']
-
-        # value = pd.Timedelta(seconds=truth[trace])
         yiqing_start = pd.to_datetime('2020/1/20 00:00:00', infer_datetime_format=True).tz_localize(pytz.UTC)
 
         mean_time = int(trace_time_info[df['TRANSPORT_TRACE'].iloc[0]])
@@ -112,7 +97,6 @@ def save_to_feature(port_gps_info, trace_time_info, root_path, save_root_path):
                 group_data['label'] = df['label'] - mean_time
             else:
                 group_data['label'] = (group_data['mmax'] - group_data['mmin']).dt.total_seconds() - mean_time
-
 
             # if (group_data['mmax'].iloc[0] - yiqing_start).days > 0:
             #     group_data['yiqing'] = 1
@@ -127,13 +111,6 @@ def save_to_feature(port_gps_info, trace_time_info, root_path, save_root_path):
             # else:
             #     group_data['yiqing'] = 0
 
-        # agg_function = ['min', 'max', 'mean', 'median']
-        # agg_col = ['latitude', 'speed', 'direc_diff', 'angular_speed']
-        # group = df.groupby('loadingOrder')[agg_col].agg(agg_function).reset_index()
-        # group.columns = ['loadingOrder'] + ['{}_{}'.format(i, j) for i in agg_col for j in agg_function]
-        # group_data = group_data.merge(group, on='loadingOrder', how='left')
-
-        # group_data['dis'] = dis
         group_data['start_lat'] = start_gps[0]
         group_data['start_long'] = start_gps[1]
         group_data['end_lat'] = end_gps[0]
@@ -151,9 +128,6 @@ def save_to_feature(port_gps_info, trace_time_info, root_path, save_root_path):
         else:
             group_data['lat_per_hour'] = lat_diff / lat_hours
 
-        # group_data['start_err_dis'] = get_distance((df['latitude'].iloc[0], df['longitude'].iloc[0]), (start_gps[0], start_gps[1]))
-        # print(group_data.head())
-        # assert False
         group_data['mean_speed'] = get_distance((df['latitude'].iloc[0], df['longitude'].iloc[0]), (df['latitude'].iloc[-1], df['longitude'].iloc[-1]))\
                                    / math.ceil(abs(df['timestamp'].iloc[-1] - df['timestamp'].iloc[0]).total_seconds() / 3600)
 
@@ -180,7 +154,6 @@ if __name__ == "__main__":
 
     port_gps_info = get_port_gps_info(port_gps_path)
 
-    # trace_time_info = get_trace_time_from_csv(trace_time_path)
     trace_time_info = get_trace_time_from_pkl(trace_time_path)
 
     save_to_feature(port_gps_info, trace_time_info, root_path, save_root_path)
